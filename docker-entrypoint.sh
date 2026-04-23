@@ -14,7 +14,7 @@ echo "server.memory.pagecache.size=${PAGECACHE_SIZE}" >> /var/lib/neo4j/conf/neo
 echo "Neo4j configuration updated with environment variables"
 
 # TLS Setup (opt-in via ENABLE_TLS=true)
-if [ "${ENABLE_TLS}" = "true" ]; then
+if [ "${ENABLE_TLS:-false}" = "true" ]; then
     echo "TLS is enabled. Setting up certificates..."
 
     BOLT_CERT_DIR=/var/lib/neo4j/certificates/bolt
