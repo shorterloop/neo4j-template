@@ -86,5 +86,6 @@ if [ -n "${HTTP_ADVERTISED_ADDRESS}" ]; then
     echo "HTTP advertised address set to: ${HTTP_ADVERTISED_ADDRESS}"
 fi
 
-# Start Neo4j
-exec neo4j console
+# Start Neo4j via official entrypoint script to process environment variables (like NEO4J_AUTH)
+exec /startup/docker-entrypoint.sh neo4j console
+
