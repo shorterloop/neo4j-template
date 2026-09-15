@@ -14,13 +14,17 @@ ENV RELATION_CSV_URLS=${RELATION_CSV_URLS}
 RUN mkdir -p /data /import
 
 # Install curl to download the CSV files
+# Bullseye security packages have left the live mirror. Use the final LTS
+# snapshot; keep signature verification enabled and relax only snapshot expiry.
 RUN set -eux; \
-    find /etc/apt/sources.list.d -type f -exec sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' {} +; \
-    if [ -f /etc/apt/sources.list ]; then \
-        sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list; \
-    fi; \
+    rm -f /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; \
+    printf '%s\n' \
+      'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20260831T235959Z/ bullseye main' \
+      'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20260831T235959Z/ bullseye-updates main' \
+      'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/20260831T235959Z/ bullseye-security main' \
+      > /etc/apt/sources.list; \
     rm -rf /var/lib/apt/lists/*; \
-    apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=true -o Acquire::https::No-Cache=true update; \
+    apt-get -o Acquire::Retries=3 update; \
     apt-get install -y --no-install-recommends curl; \
     rm -rf /var/lib/apt/lists/*
 
@@ -140,13 +144,17 @@ COPY server-logs.xml /var/lib/neo4j/conf/server-logs.xml
 COPY user-logs.xml /var/lib/neo4j/conf/server-logs.xml
 
 # Install openssl for TLS certificate generation
+# Bullseye security packages have left the live mirror. Use the final LTS
+# snapshot; keep signature verification enabled and relax only snapshot expiry.
 RUN set -eux; \
-    find /etc/apt/sources.list.d -type f -exec sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' {} +; \
-    if [ -f /etc/apt/sources.list ]; then \
-        sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list; \
-    fi; \
+    rm -f /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; \
+    printf '%s\n' \
+      'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20260831T235959Z/ bullseye main' \
+      'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian/20260831T235959Z/ bullseye-updates main' \
+      'deb [check-valid-until=no] https://snapshot.debian.org/archive/debian-security/20260831T235959Z/ bullseye-security main' \
+      > /etc/apt/sources.list; \
     rm -rf /var/lib/apt/lists/*; \
-    apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=true -o Acquire::https::No-Cache=true update; \
+    apt-get -o Acquire::Retries=3 update; \
     apt-get install -y --no-install-recommends openssl; \
     rm -rf /var/lib/apt/lists/*
 
