@@ -14,7 +14,15 @@ ENV RELATION_CSV_URLS=${RELATION_CSV_URLS}
 RUN mkdir -p /data /import
 
 # Install curl to download the CSV files
-RUN apt-get update && apt-get install -y curl
+RUN set -eux; \
+    find /etc/apt/sources.list.d -type f -exec sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' {} +; \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*; \
+    apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=true -o Acquire::https::No-Cache=true update; \
+    apt-get install -y --no-install-recommends curl; \
+    rm -rf /var/lib/apt/lists/*
 
 # Create download and process scripts
 COPY <<-'EOF' /download.sh
@@ -132,7 +140,15 @@ COPY server-logs.xml /var/lib/neo4j/conf/server-logs.xml
 COPY user-logs.xml /var/lib/neo4j/conf/server-logs.xml
 
 # Install openssl for TLS certificate generation
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+RUN set -eux; \
+    find /etc/apt/sources.list.d -type f -exec sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' {} +; \
+    if [ -f /etc/apt/sources.list ]; then \
+        sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' /etc/apt/sources.list; \
+    fi; \
+    rm -rf /var/lib/apt/lists/*; \
+    apt-get -o Acquire::Retries=3 -o Acquire::http::No-Cache=true -o Acquire::https::No-Cache=true update; \
+    apt-get install -y --no-install-recommends openssl; \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy entrypoint script that handles memory config, TLS setup, and starts Neo4j
 COPY docker-entrypoint.sh /docker-entrypoint.sh
